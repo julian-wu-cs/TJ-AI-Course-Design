@@ -1,14 +1,13 @@
-﻿"""Eight-Queens benchmark script used in the report appendix.
+"""八皇后基准脚本
 
-Implemented methods:
-1) Imperative permutation generation + logic filtering
-2) Pure logic programming via Kanren permuteq
-3) Pure logic programming with custom neq relations
-4) DFS over partial placements
-5) BFS over partial placements
-6) Bit-mask backtracking
+实现了 6 种求解方式：
+1) 命令式全排列 + 逻辑过滤
+2) 纯逻辑建模（permuteq）
+3) 纯逻辑建模（自定义 neq 关系）
+4) DFS 搜索
+5) BFS 搜索
+6) 位运算回溯
 """
-
 from __future__ import annotations
 
 import argparse
@@ -24,11 +23,11 @@ from kanren import eq, lall, membero, permuteq, run, var, vars
 from unification import isvar, reify
 
 
-Placement = tuple[int, ...]  # col -> row
+Placement = tuple[int, ...]  # 列索引 -> 行索引
 
 
 def can_place(prefix: Placement, next_row: int) -> bool:
-    """Return True if next_row is safe for the next column."""
+    """检查 next_row 放在下一列是否安全。"""
     next_col = len(prefix)
     for old_col, old_row in enumerate(prefix):
         same_row = old_row == next_row
@@ -39,11 +38,12 @@ def can_place(prefix: Placement, next_row: int) -> bool:
 
 
 def diagonal_clear_goal(board_term):
-    """Kanren relation: all queens in board_term avoid diagonal conflicts."""
+    """Kanren 关系：board_term 中任意两皇后不在同一对角线。"""
 
     def goal(subst):
         board_value = reify(board_term, subst)
         if isvar(board_value):
+            # 变量还没具体化时先不剪枝，交给后续约束继续收缩搜索空间。
             return (subst,)
         board_len = len(board_value)
         for left_col in range(board_len):
@@ -56,7 +56,7 @@ def diagonal_clear_goal(board_term):
 
 
 def neq_rel(left, right):
-    """Custom non-equality relation for Kanren 0.2.x."""
+    """给 Kanren 0.2.x 补一个“!=”关系。"""
 
     def goal(subst):
         left_value = reify(left, subst)
@@ -71,7 +71,7 @@ def neq_rel(left, right):
 
 
 def diagonal_neq_rel(left, right, distance: int):
-    """Custom relation: abs(left-right) must not equal distance."""
+    """约束 |left-right| != distance（对角线冲突判定）。"""
 
     def goal(subst):
         left_value = reify(left, subst)
@@ -86,6 +86,7 @@ def diagonal_neq_rel(left, right, distance: int):
 
 
 def solve_imperative_then_logic(n: int) -> tuple[list[Placement], int]:
+    # 先命令式枚举全排列，再用逻辑约束过滤。
     domain = tuple(range(n))
     all_permutations = list(itertools.permutations(domain))
     symbol = var()
@@ -94,12 +95,13 @@ def solve_imperative_then_logic(n: int) -> tuple[list[Placement], int]:
 
 
 def solve_pure_logic_permuteq(n: int) -> tuple[list[Placement], int]:
+    # 用 permuteq 直接声明“是 0..n-1 的一个排列”。
     domain = tuple(range(n))
     queens = tuple(vars(n))
     constraints = [permuteq(domain, queens), diagonal_clear_goal(queens)]
     solutions = run(0, queens, lall(*constraints))
 
-    # Permutation space size: n!
+    # 这里把 n! 作为“理论上排列空间规模”的展开状态数。
     expanded_states = 1
     for value in range(2, n + 1):
         expanded_states *= value
@@ -107,7 +109,7 @@ def solve_pure_logic_permuteq(n: int) -> tuple[list[Placement], int]:
 
 
 def counted_member_rel(symbol, domain, counter):
-    """Custom member relation with external counter for node statistics."""
+    """带计数器的 member 关系，用于统计候选尝试次数。"""
 
     def goal(subst):
         for candidate in domain:
@@ -118,6 +120,7 @@ def counted_member_rel(symbol, domain, counter):
 
 
 def solve_pure_logic_custom_neq(n: int) -> tuple[list[Placement], int]:
+    # 每列先做取值约束，再和之前列叠加“不同行 + 不同对角线”约束。
     domain = tuple(range(n))
     queens = tuple(vars(n))
     counter = [0]
@@ -144,7 +147,7 @@ def solve_dfs(n: int) -> tuple[list[Placement], int]:
         if len(prefix) == n:
             solutions.append(prefix)
             continue
-        # Reverse append to keep lexicographic order stable after stack pop.
+        # 逆序入栈，出栈后仍保持从小到大的行号顺序。
         for row in range(n - 1, -1, -1):
             if can_place(prefix, row):
                 frontier.append(prefix + (row,))
@@ -171,6 +174,7 @@ def solve_bfs(n: int) -> tuple[list[Placement], int]:
 
 
 def solve_bitmask_backtracking(n: int) -> tuple[list[Placement], int]:
+    # full_mask 的低 n 位都为 1，用来截断移位后的无关高位。
     full_mask = (1 << n) - 1
     row_to_col = [0] * n
     solutions: list[Placement] = []
@@ -189,6 +193,7 @@ def solve_bitmask_backtracking(n: int) -> tuple[list[Placement], int]:
 
         available_positions = full_mask & ~(col_mask | main_diag_mask | anti_diag_mask)
         while available_positions:
+            # 取最低位的 1：当前可放置列中的一个候选。
             lowest = available_positions & -available_positions
             available_positions ^= lowest
 
@@ -197,6 +202,7 @@ def solve_bitmask_backtracking(n: int) -> tuple[list[Placement], int]:
             backtrack(
                 row + 1,
                 col_mask | lowest,
+                # 主对角线对下一行影响左移一位；副对角线右移一位。
                 ((main_diag_mask | lowest) << 1) & full_mask,
                 (anti_diag_mask | lowest) >> 1,
             )
@@ -206,6 +212,7 @@ def solve_bitmask_backtracking(n: int) -> tuple[list[Placement], int]:
 
 
 def canonicalize(solutions: list[Placement]) -> list[Placement]:
+    # 统一排序，便于不同算法和多次重复之间做一致性比较。
     return sorted(tuple(sol) for sol in solutions)
 
 
@@ -214,6 +221,7 @@ def benchmark_method(
     n: int,
     repeat: int,
 ) -> dict[str, float | int]:
+    """重复运行同一求解器并汇总时间/状态统计。"""
     elapsed_samples: list[float] = []
     reference_solutions = None
     reference_count = 0
@@ -230,6 +238,7 @@ def benchmark_method(
             reference_count = len(normalized)
             stable_expanded_states = expanded_states
         else:
+            # 同一算法重复运行结果必须稳定，否则基准数据不可比较。
             if normalized != reference_solutions:
                 raise RuntimeError("The solver returned inconsistent solution sets across repeats.")
             if expanded_states != stable_expanded_states:
@@ -281,3 +290,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

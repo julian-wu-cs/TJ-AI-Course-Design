@@ -2,20 +2,20 @@
 
 \section{八皇后问题形式化定义}
 
-设棋盘规模为 $N\times N$（本实验取 $N=8$）。定义状态向量
+设棋盘规模为 $N\times N$（本实验固定为 $N=8$）。定义状态向量
 \begin{equation}
   \mathbf{q}=(q_0,q_1,\ldots,q_{N-1}),\quad q_i\in\{0,1,\ldots,N-1\},
 \end{equation}
-其中 $q_i$ 表示第 $i$ 列皇后所在行。合法解需满足：
+其中 $q_i$ 表示第 $i$ 列皇后所在行。合法解需同时满足：
 \begin{align}
   q_i       & \neq q_j,\quad   &  & \forall\ 0\le i<j<N, \\
   |q_i-q_j| & \neq |i-j|,\quad &  & \forall\ 0\le i<j<N.
 \end{align}
-前者保证不同行，后者保证不在同一对角线。
+前式排除同一行冲突，后式排除同一对角线冲突。
 
 \section{方法对照设计}
 
-报告将方法组织为六个可比较的实现，并与任务要求建立一一映射，如\tabref{tab:method-overview}所示。
+为了避免“各说各话”的比较方式，报告把实现统一整理为 6 条可对照的技术路线，并与课程任务逐一对应，如\tabref{tab:method-overview}。
 
 \begin{table}[htbp]
   \centering
@@ -45,34 +45,34 @@
   \item 结果文件：\texttt{experiments/eight\_queens\_benchmark.json}。
 \end{itemize}
 
-接口说明与基础语法主要参考 Python 官方文档、Kanren 项目文档及课程提供资料\cite{python_docs,logpy_repo,runoob_python}。
+接口说明与基础语法主要参考 Python 官方文档、Kanren 项目文档及课程资料\cite{python_docs,logpy_repo,runoob_python}。
 
-复现实验采用以下固定流程：
+为了让不同方法可重复、可对比，复现实验统一按以下流程执行：
 \begin{enumerate}
-  \item 设定参数 $N=8$，每种方法独立运行；
+  \item 固定参数 $N=8$，六种方法独立运行；
   \item 每种方法重复 3 次，记录均值、标准差、最小值、最大值；
-  \item 比较六种方法的解数量是否一致（应为 92）；
-  \item 记录状态展开规模并结合复杂度进行解释。
+  \item 对照解数量与典型解（字典序最小/最大）的一致性；
+  \item 统计展开状态数，并结合复杂度做解释。
 \end{enumerate}
 
 \section{评价指标}
 
-评价指标分为两类：
+指标分为“结果是否正确”和“运行是否高效”两类：
 \begin{itemize}
   \item \textbf{正确性指标}：解数量、最小字典序解、最大字典序解是否一致；
   \item \textbf{性能指标}：平均耗时与展开状态数。
 \end{itemize}
 
-其中耗时通过 \texttt{time.perf\_counter()} 统计，单位为毫秒。
+其中耗时由 \texttt{time.perf\_counter()} 统计，单位为毫秒。
 
 \section{复杂度分析基线}
 
-从理论上看，若不利用剪枝，八皇后搜索空间会快速膨胀。作为后续对照基线，可给出如下上界描述：
+理论复杂度只给出增长趋势，不直接等同于实际运行时间。作为后续讨论的参照，六类方法的上界可概括为：
 \begin{itemize}
   \item M1、M2：基于全排列候选，时间上界可记为 $O(N!\cdot N^2)$；
-  \item M3：仍属于指数级搜索，但通过增量约束可显著减少无效分支；
-  \item M4、M5：最坏情况下均为指数级，DFS 空间压力通常小于 BFS\cite{cormen2022}；
-  \item M6：搜索树与回溯法同阶，但位运算降低了单节点常数开销。
+  \item M3：仍属于指数级搜索，但增量约束会显著减少无效分支；
+  \item M4、M5：最坏情况下均为指数级，DFS 的空间压力通常小于 BFS\cite{cormen2022}；
+  \item M6：搜索树与回溯法同阶，但位运算可降低单节点常数开销。
 \end{itemize}
 
-第\ref{chap:math}章将用实测数据验证这些判断。
+第\ref{chap:math}章将结合实测数据检验这些判断。

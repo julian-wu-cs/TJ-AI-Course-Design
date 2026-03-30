@@ -5,50 +5,50 @@
     "imperative_plus_logic": {
       "solutions": 92,
       "expanded_states": 40320,
-      "time_mean_ms": 1761.672,
-      "time_std_ms": 26.211,
-      "time_min_ms": 1733.246,
-      "time_max_ms": 1796.488
+      "time_mean_ms": 895.353,
+      "time_std_ms": 15.229,
+      "time_min_ms": 876.717,
+      "time_max_ms": 914.02
     },
     "logic_permuteq": {
       "solutions": 92,
       "expanded_states": 40320,
-      "time_mean_ms": 16507.19,
-      "time_std_ms": 1482.977,
-      "time_min_ms": 15047.053,
-      "time_max_ms": 18541.035
+      "time_mean_ms": 15358.193,
+      "time_std_ms": 205.973,
+      "time_min_ms": 15139.976,
+      "time_max_ms": 15634.404
     },
     "logic_custom_neq": {
       "solutions": 92,
       "expanded_states": 15720,
-      "time_mean_ms": 2856.098,
-      "time_std_ms": 15.241,
-      "time_min_ms": 2836.367,
-      "time_max_ms": 2873.476
+      "time_mean_ms": 2665.156,
+      "time_std_ms": 20.361,
+      "time_min_ms": 2638.957,
+      "time_max_ms": 2688.602
     },
     "dfs": {
       "solutions": 92,
       "expanded_states": 2057,
-      "time_mean_ms": 6.003,
-      "time_std_ms": 0.114,
-      "time_min_ms": 5.872,
-      "time_max_ms": 6.15
+      "time_mean_ms": 6.07,
+      "time_std_ms": 0.086,
+      "time_min_ms": 5.957,
+      "time_max_ms": 6.167
     },
     "bfs": {
       "solutions": 92,
       "expanded_states": 2057,
-      "time_mean_ms": 5.9,
-      "time_std_ms": 0.094,
-      "time_min_ms": 5.819,
-      "time_max_ms": 6.032
+      "time_mean_ms": 5.772,
+      "time_std_ms": 0.129,
+      "time_min_ms": 5.644,
+      "time_max_ms": 5.948
     },
     "bitwise_backtracking": {
       "solutions": 92,
       "expanded_states": 2057,
-      "time_mean_ms": 0.615,
-      "time_std_ms": 0.003,
-      "time_min_ms": 0.613,
-      "time_max_ms": 0.619
+      "time_mean_ms": 0.644,
+      "time_std_ms": 0.023,
+      "time_min_ms": 0.615,
+      "time_max_ms": 0.671
     }
   }
 }
