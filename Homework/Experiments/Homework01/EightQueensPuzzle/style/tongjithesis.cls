@@ -234,7 +234,7 @@
   \RequirePackage[
     backend=biber,
     style=gb7714-2015,
-    natbib=true,
+    natbib=false,
   ]{biblatex}
 \else
   \RequirePackage[sort&compress]{gbt7714}
@@ -380,8 +380,8 @@
 % 设置摘要与目录页样式（如页眉、页脚等）
 \fancypagestyle{firststyle}{
   \fancyhf{}
-  \fancyhead[LO,RE]{~ \includegraphics[height=1.14cm]{figures/tongji.pdf}~}
-  \fancyhead[RO,LE]{\large ~\tjheadertext~\\}
+  \fancyhead[LO]{~ \includegraphics[height=1.14cm]{figures/tongji.pdf}~}
+  \fancyhead[RO]{\large ~\tjheadertext~\\}
   \fancyfoot[C]{\large \thepage}
   \renewcommand{\headrulewidth}{1.8pt}
   \renewcommand{\footrulewidth}{0pt}
@@ -390,10 +390,9 @@
 % 设置正文页样式（如页眉、页脚等）
 \fancypagestyle{mainstyle}{
   \fancyhf{}
-  \fancyhead[LO,RE]{~ \includegraphics[height=1.14cm]{figures/tongji.pdf}~}
-  \fancyhead[RO,LE]{\large ~\tjheadertext~\\}
+  \fancyhead[LO]{~ \includegraphics[height=1.14cm]{figures/tongji.pdf}~}
+  \fancyhead[RO]{\large ~\tjheadertext~\\}
   \fancyfoot[RO]{{\large 共\quad \pageref{LastPage}\quad 页\quad 第\quad \thepage \quad 页}}
-  \fancyfoot[LE]{{\large 第\quad \thepage \quad 页\quad 共\quad \pageref{LastPage}\quad 页}}
   \renewcommand{\headrulewidth}{1.8pt}
   \renewcommand{\footrulewidth}{1.8pt}
 }
@@ -564,7 +563,9 @@
 \restylefloat{table}
 \floatstyle{plain}
 \restylefloat{listing}      % minted 默认 ruled，\newfloat 默认 plain；统一为 plain
-\sloppy
+\setlength{\emergencystretch}{2em}
+\hbadness=10000
+\hfuzz=6pt
 
 % ==========================================
 % Math and Theorem Environments
@@ -844,5 +845,9 @@
 % 加载用户配置文件
 % cfg is found via TEXINPUTS: locally via .latexmkrc (./style//), or alongside cls on CTAN/texmf.
 \AtEndOfPackage{
-  \InputIfFileExists{tongjithesis.cfg}{}{}
+  \InputIfFileExists{tongjithesis.cfg}{}{%
+    \InputIfFileExists{style/tongjithesis.cfg}{}{%
+      \ClassWarningNoLine{tongjithesis}{Configuration file `tongjithesis.cfg' not found}%
+    }%
+  }
 }
