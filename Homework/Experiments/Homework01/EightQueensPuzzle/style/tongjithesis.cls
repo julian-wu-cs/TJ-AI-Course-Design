@@ -143,8 +143,11 @@
 \lstset{
   backgroundcolor=\color{bg},
   basicstyle=\small\ttfamily\linespread{1.0}\selectfont,
-  keywordstyle=\color{keywordcolor}\bfseries,
-  commentstyle=\color{commentcolor}\itshape,
+  % lmtt usually provides b, but not bx; avoid fallback warning.
+  keywordstyle=\color{keywordcolor}\fontseries{b}\selectfont,
+  % Chinese comments in code listings may use fonts without italic shape.
+  % Keep comment color, but avoid forcing italic to prevent font warnings.
+  commentstyle=\color{commentcolor}\normalfont,
   stringstyle=\color{stringcolor},
   numbers=left,
   numberstyle=\small\color{gray},
