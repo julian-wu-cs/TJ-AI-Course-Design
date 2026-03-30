@@ -1,0 +1,33 @@
+﻿\chapter{附录：复现实验数据与完整代码}\label{chap:appendix-data}
+
+\section{复现实验命令}
+
+在项目根目录执行以下命令即可重新生成结果文件：
+
+\begin{lstlisting}[language=bash,caption={八皇后实验复现命令},label=lst:reproduce]
+python experiments/eight_queens_benchmark.py --n 8 --repeat 3
+\end{lstlisting}
+
+默认输出路径为 \texttt{experiments/eight\_queens\_benchmark.json}。
+
+\section{完整实验代码}
+
+\lstinputlisting[
+  language=Python,
+  caption={完整实验脚本：\texttt{experiments/eight\_queens\_benchmark.py}},
+  label=lst:appendix-full-code,
+  basicstyle=\ttfamily\scriptsize,
+  breaklines=true,
+  escapeinside=@@
+]{experiments/eight_queens_benchmark.py}
+
+\section{完整实验结果 JSON}
+
+\lstinputlisting[
+  language=Java,
+  caption={完整实验结果：\texttt{experiments/eight\_queens\_benchmark.json}},
+  label=lst:appendix-full-json,
+  basicstyle=\ttfamily\scriptsize,
+  breaklines=true,
+  escapeinside=@@
+]{experiments/eight_queens_benchmark.json}

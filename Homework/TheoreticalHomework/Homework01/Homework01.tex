@@ -1,0 +1,269 @@
+\documentclass[12pt,onecolumn]{ctexrep}
+\usepackage{amsmath}
+\usepackage{unicode-math}
+\usepackage{setspace}
+\setmainfont{Times New Roman}
+\setmathfont{Latin Modern Math}
+
+
+\usepackage{booktabs}      % 三线表
+\usepackage{multirow}      % 跨行
+\usepackage{array}         % 表格增强
+\usepackage{caption}        % 表格标题
+
+\usepackage[normalem]{ulem} % 下划线
+\usepackage{xcolor}       % 颜色
+
+\usepackage{geometry}    % 纸张和边距设置
+\geometry{a4paper, left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm} % 设置纸张大小和边距
+\geometry{a4paper, hmargin = 2.5cm, vmargin = 2.5cm} % 设置纸张大小和边距的另一种方式
+\geometry{margin = 2.5cm} % 设置纸张大小和边距的第三种方式
+
+\usepackage{graphicx}      % 图形处理
+\usepackage{subcaption}   % 子图支持
+
+\usepackage[most]{tcolorbox}
+\usepackage{xparse}
+
+\usepackage{hyperref}     % 超链接支持
+\usepackage{listings}     % 代码高亮支持
+
+\usepackage{multicol}     % 多栏支持
+\usepackage{lipsum}       % 填充文本
+
+\usepackage{diagbox}      % 表格增强
+
+\usepackage{multirow}     % 合并行
+
+\renewcommand{\tableautorefname}{表}
+
+
+\lstset{
+    language={[LaTeX]TeX},
+    basicstyle=\ttfamily\footnotesize,
+    keywordstyle=\color{blue!70!black}\bfseries,
+    commentstyle=\color{green!35!black},
+    stringstyle=\color{red!60!black},
+    morekeywords={
+        documentclass,usepackage,begin,end,
+        section,subsection,subsubsection,
+        textbf,emph,item,itemize,enumerate,
+        caption,label,ref,cite,
+        includegraphics,table,figure
+    },
+    numbers=left,
+    numberstyle=\color{gray}\scriptsize,
+    stepnumber=1,
+    numbersep=10pt,
+    showstringspaces=false,
+    keepspaces=true,
+    tabsize=4,
+    breaklines=true,
+    breakatwhitespace=true,
+    frame=single,
+    rulecolor=\color{gray!40},
+    framesep=5pt,
+    backgroundcolor=\color{gray!5},
+    xleftmargin=1em,
+    xrightmargin=0.5em,
+    aboveskip=1em,
+    belowskip=1em
+}
+
+\NewDocumentEnvironment{mybox}{m m O{}}
+{
+  \if\relax\detokenize{#3}\relax
+  % 无标题版本
+  \begin{tcolorbox}[
+    enhanced,
+    breakable,
+    colback=gray!2,
+    colframe=#1,
+    boxrule=1pt,
+    arc=3mm,
+    left=3mm,
+    right=3mm,
+    top=2mm,
+    bottom=2mm,
+    before skip=10pt,
+    after skip=4pt,
+    drop shadow=black!15
+  ]
+  \else
+  % 有标题版本
+  \begin{tcolorbox}[
+    enhanced,
+    breakable,
+    colback=gray!2,
+    colframe=#1,
+    boxrule=1pt,
+    arc=3mm,
+    left=3mm,
+    right=3mm,
+    top=2mm,
+    bottom=2mm,
+    before skip=10pt,
+    after skip=4pt,
+    drop shadow=black!15,
+    title={#3},
+    coltitle=white,
+    fonttitle=\bfseries,
+    colbacktitle=#1
+  ]
+  \fi
+}
+{
+  \end{tcolorbox}
+  \par\noindent
+  {\centering\footnotesize\color{gray!88}#2\par}
+}
+
+% 标题 作者 日期
+\title{Homework01 by \LaTeX}
+\author{2452900 Julian Wu}
+\date{\today}
+
+
+
+
+\begin{document}
+\maketitle
+
+\begin{mybox}{red}{}[7. 使用全称量词或存在量词描述下列事实]
+    \begin{enumerate}
+        \item[(a)] “不是所有的篮球运动员的身高都超过 $1.8\text{ m}$。”
+
+              设 $B(x)$ 表示“$x$ 是篮球运动员”，$H(x)$ 表示“$x$ 的身高超过 $1.8\text{ m}$”，则原命题可表示为
+              \[
+                  \neg (\forall x)(B(x)\rightarrow H(x))
+              \]
+              其等价形式为
+              \[
+                  (\exists x)(B(x)\land \neg H(x))
+              \]
+
+        \item[(b)] “所有实数的平方都大于或等于 $0$。”
+
+              设论域为实数集 $\mathbb{R}$，则可表示为
+              \[
+                  (\forall x\in \mathbb{R})(x^2\ge 0)
+              \]
+    \end{enumerate}
+\end{mybox}
+
+\vspace{1em}
+\begin{mybox}{blue}{}[8]
+    已知 $(\forall x)(F(x)\rightarrow (G(x)\lor H(x)))$，$\neg (\forall x)(F(x)\rightarrow G(x))$，试证明 $(\exists x)(F(x)\land H(x))$
+\end{mybox}
+
+\begin{mybox}{red}{}[8]
+    \textbf{证明：}
+
+    $\neg (\forall x)(F(x)\rightarrow G(x))\\
+        \leftrightarrow(\exists x)\neg (F(x)\rightarrow G(x))\\
+        \leftrightarrow(\exists x)\neg(\neg F(x)\lor G(x))\\
+        \leftrightarrow(\exists x)(F(x)\land \neg G(x))$
+    因此存在某个元素 $a$，使得
+    \[
+        F(a)\land \neg G(a)
+    \]
+    $\because (\forall x)(F(x)\rightarrow (G(x)\lor H(x)))\\
+    \therefore F(a)\rightarrow (G(a)\lor H(a))\\$
+
+    由于 $F(a)$ 成立，于是推出
+    \[
+        G(a)\lor H(a)
+    \]
+    又已知 $\neg G(a)$，故由析取三段论可得
+    \[
+        H(a)
+    \]
+    从而有
+    \[
+        F(a)\land H(a)
+    \]
+    因此可得
+    \[
+        (\exists x)(F(x)\land H(x))
+    \]
+\end{mybox}
+
+\vspace{1em}
+\begin{mybox}{blue}{}[11]
+    根据\autoref{tab:admission-data}的数据进行分析，解释其在录取过程中是否存在所谓的“歧视女生”问题。
+\end{mybox}
+\begin{table}[htbp]
+    \centering
+    \caption{申请人数与录取人数数据}
+    \label{tab:admission-data}
+    \renewcommand{\arraystretch}{1.4}
+    \setlength{\tabcolsep}{8pt}
+    \begin{tabular}{c|ccc|ccc}
+        \hline
+        \multirow{2}{*}{系别}
+             & \multicolumn{3}{c|}{男性申请者}
+             & \multicolumn{3}{c}{女性申请者}                                          \\
+        \cline{2-7}
+             & 人数                         & 录取人数 & 录取比例/\% & 人数  & 录取人数 & 录取比例/\% \\
+        \hline
+        英语   & 825                        & 512  & 62      & 108 & 89   & 82      \\
+        俄语   & 560                        & 353  & 63      & 25  & 17   & 68      \\
+        西班牙语 & 417                        & 138  & 33      & 375 & 131  & 35      \\
+        意大利语 & 373                        & 22   & 6       & 341 & 24   & 7       \\
+        \hline
+        总计   & 2175                       & 1024 & 47      & 849 & 261  & 31      \\
+        \hline
+    \end{tabular}
+\end{table}
+
+\begin{mybox}{red}{}[11]
+    \textbf{解：}
+
+    由表中数据可得，各系男女录取比例如下：
+    \[
+        \begin{array}{c|cc}
+            \text{系别}   & \text{男性录取率} & \text{女性录取率} \\
+            \hline
+            \text{英语}   & 62\%         & 82\%         \\
+            \text{俄语}   & 63\%         & 68\%         \\
+            \text{西班牙语} & 33\%         & 35\%         \\
+            \text{意大利语} & 6\%          & 7\%
+        \end{array}
+    \]
+
+    可以看出，在\textbf{每一个系内部}，女性录取率都略高于男性录取率，因此如果分别考察各系，\textbf{并不存在“歧视女生”}的现象。
+
+    但是从总体数据看：
+    \[
+        \text{男性总体录取率}=\frac{1024}{2175}\approx 47.1\%,
+        \qquad
+        \text{女性总体录取率}=\frac{261}{849}\approx 30.7\%.
+    \]
+    于是总体上似乎表现为女性录取率低于男性录取率。
+
+    这种“分组后女性更高，但总体上女性反而更低”的现象，是一个典型的\textbf{辛普森悖论（Simpson's paradox）}。
+
+    其原因在于：男女申请者在各系之间的分布不同。由表中数据可见：
+
+    \begin{itemize}
+        \item 女性申请者更多集中在录取率较低的专业，例如西班牙语和意大利语；
+        \item 男性申请者更多集中在录取率较高的专业，例如英语和俄语。
+    \end{itemize}
+
+    具体来说：
+    \[
+        \frac{375+341}{849}=\frac{716}{849}\approx 84.3\%
+    \]
+    的女性申请者集中在西班牙语和意大利语这两个低录取率专业；
+
+    而男性在这两个专业中的比例为
+    \[
+        \frac{417+373}{2175}=\frac{790}{2175}\approx 36.3\%.
+    \]
+
+    因此，女性总体录取率低，并不是因为在同一专业中受到不公平对待，而是因为\textbf{申请专业的结构分布不同}：女性更多申请竞争更激烈、录取率更低的专业，导致总体平均录取率下降。
+
+    \textbf{结论：}
+    若按各系分别分析，则没有证据表明存在“歧视女生”问题；总体录取率差异主要是由男女申请者在不同专业间的分布差异造成的，这正是辛普森悖论的典型表现。
+\end{mybox}
+\end{document}

@@ -1,0 +1,80 @@
+﻿\chapter{实验结果与复杂度分析}\label{chap:math}
+
+\section{实验结果总览}
+
+实验输出文件为 \texttt{experiments/eight\_queens\_benchmark.json}。在 $N=8$、重复 3 次条件下，结果如\tabref{tab:benchmark-main}。
+
+\begin{table}[htbp]
+  \centering
+  \caption{八皇后问题六种方法对比结果}\label{tab:benchmark-main}
+  \begin{tabular}{lrrrr}
+    \toprule
+    方法                        & 解数量 & 搜索规模（状态） & 平均耗时（ms）  & 标准差（ms）  \\
+    \midrule
+    M1 命令式穷举+逻辑筛选             & 92  & 40320    & 1761.672  & 26.211   \\
+    M2 纯逻辑（\texttt{permuteq}） & 92  & 40320    & 16507.190 & 1482.977 \\
+    M3 纯逻辑（自定义不等关系）           & 92  & 15720    & 2856.098  & 15.241   \\
+    M4 DFS                    & 92  & 2057     & 6.003     & 0.114    \\
+    M5 BFS                    & 92  & 2057     & 5.900     & 0.094    \\
+    M6 位运算回溯                  & 92  & 2057     & 0.615     & 0.003    \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+六种方法都返回 92 个解，说明实现在正确性上互相印证。性能方面，位运算回溯依旧最优。
+
+\section{运行时间比较}
+
+以 M2（纯逻辑 \texttt{permuteq}）作为参考基线，定义加速比：
+\begin{equation}
+  \text{Speedup}(M_i)=\frac{T_{M2}}{T_{M_i}}.
+\end{equation}
+
+据此可得：
+\begin{itemize}
+  \item M1 相对 M2 加速约 $9.37\times$；
+  \item M3 相对 M2 加速约 $5.78\times$；
+  \item M4 与 M5 相对 M2 分别加速约 $2749.82\times$ 和 $2797.83\times$；
+  \item M6 相对 M2 加速约 $26840.96\times$。
+\end{itemize}
+
+若只比较搜索类方法，M6 还分别比 DFS、BFS 快约 $9.76\times$ 与 $9.59\times$。说明在相近搜索树下，位运算主要优化的是节点级常数开销。
+
+\section{搜索规模与剪枝效果}
+
+从状态规模看，M1 与 M2 均遍历 40320 个全排列候选；M3 降至 15720，表明“按列赋值 + 即时约束”能够提前剔除大量无效分支；M4/M5/M6 均为 2057，说明三者搜索树同阶。
+
+在同等节点规模下，M6 仍显著领先，原因是其冲突检测和状态推进由位运算完成，减少了 Python 层循环与对象操作成本。由此可见：\textbf{剪枝策略影响搜索规模，数据表示影响单位节点开销}。
+
+\section{理论复杂度讨论}
+
+\tabref{tab:complexity} 汇总了六种方法的复杂度与工程特征。
+
+\begin{table}[htbp]
+  \centering
+  \caption{方法复杂度与工程特性对比}\label{tab:complexity}
+  \begin{tabular}{p{3.0cm}p{3.8cm}p{3.6cm}p{4.0cm}}
+    \toprule
+    方法                        & 时间复杂度（上界）        & 空间复杂度（上界）     & 工程特征          \\
+    \midrule
+    M1 命令式穷举+逻辑筛选             & $O(N!\cdot N^2)$ & $O(N!)$（候选存储） & 写法直观，冗余候选多    \\
+    M2 纯逻辑（\texttt{permuteq}） & $O(N!\cdot N^2)$ & $O(N!)$       & 规则表达清晰，解释成本高  \\
+    M3 纯逻辑（自定义不等关系）           & 指数级（强剪枝）         & 指数级           & 增量约束显著减少无效分支  \\
+    M4 DFS                    & 指数级（强剪枝）         & $O(N)$ 到指数级   & 内存占用低，迭代开销小   \\
+    M5 BFS                    & 指数级（强剪枝）         & 指数级（层存储）      & 层次结构清晰，峰值内存更高 \\
+    M6 位运算回溯                  & 指数级（强剪枝）         & $O(N)$ 到指数级   & 位级表示降低常数，速度最优 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+复杂度上界只能描述增长趋势，不能直接代表实际耗时。对该实验而言，约束触发顺序、状态表示方式和解释器开销共同决定了最终性能。
+
+\section{本章小结}
+
+本章结论可归纳为四点：
+\begin{enumerate}
+  \item 六种实现均可稳定求得 92 解；
+  \item 位运算回溯在本实验条件下具有最高运行效率；
+  \item 逻辑方法中“自定义不等关系 + 约束前置”是有效的性能改进策略。
+  \item 使用位运算进行状态表示和冲突检测可以显著降低每个节点的处理时间，从而在相同搜索规模下实现更快的求解速度。
+\end{enumerate}

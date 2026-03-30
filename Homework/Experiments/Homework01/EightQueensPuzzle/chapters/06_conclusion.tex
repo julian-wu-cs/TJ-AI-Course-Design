@@ -1,0 +1,24 @@
+﻿\chapter{总结与展望}\label{chap:conclusion}
+
+\section{全文总结}
+
+本报告完成了八皇后实验的六方法实现与统一对照：命令式穷举+逻辑筛选、纯逻辑 \texttt{permuteq}、自定义不等关系逻辑求解、DFS、BFS、位运算回溯。核心结论如下：
+
+\begin{enumerate}
+    \item 六种方法均稳定得到 92 个合法解，正确性一致；
+    \item 纯逻辑 \texttt{permuteq} 在当前环境下耗时最高；
+    \item 加入自定义不等关系并采用增量约束后，逻辑方法性能明显改善；
+    \item 位运算回溯耗时最低，约为 DFS 的 $9.76\times$ 速度、BFS 的 $9.59\times$ 速度。
+\end{enumerate}
+
+从实验数据可以提炼出一个实用结论：\textbf{剪枝策略决定要搜索多少状态，状态表示决定每个状态处理有多快}。两者缺一不可。
+
+\section{展望}
+
+后续可沿以下路线继续推进：
+
+\begin{enumerate}
+    \item 扩展到更大规模 $N$，建立系统的性能增长曲线；
+    \item 融合约束传播与启发式选择，进一步压缩搜索空间；
+    \item 在保持逻辑可解释性的同时，引入更高性能的执行后端。
+\end{enumerate}

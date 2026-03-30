@@ -1,0 +1,69 @@
+﻿\chapter{调试过程与改进方向}\label{chap:reference}
+
+\section{调试过程记录}
+
+本章按照实际开发顺序整理调试记录。写法上尽量保留“问题如何出现、如何定位、如何修复”的链路，而不只给最终结论。
+
+\subsection{阶段一：\LaTeX 模板搭建与编译链打通}
+
+报告最初基于 https://github.com/TJ-CSCCG/TongjiThesis 模板搭建。第一轮编译并不顺利，主要问题集中在编译链配置。
+
+\paragraph{问题 1：\texttt{minted} 相关报错}
+首次执行 \texttt{latexmk -xelatex main.tex} 时出现：
+\begin{quote}
+    \texttt{Package minted Error: You must invoke LaTeX with the -shell-escape flag.}
+\end{quote}
+
+原因是模板开启了 \texttt{minted=true}，但命令行没有带外部高亮所需权限。修复方式是统一改为使用项目内的 \texttt{latexmk} 配置，避免手工命令参数不一致。
+
+\paragraph{问题 2：封面年份命令冲突}
+在 \texttt{chapters/frontcover.tex} 中，早期写法使用了与模板宏包冲突的年份命令，导致编译报 \texttt{Undefined control sequence}。定位方式是查看 \texttt{main.log} 的首个报错行，再回到对应 \texttt{tex} 文件按行排查。
+
+修复后统一采用模板推荐字段，避免自定义同名命令覆盖。
+
+\paragraph{问题 3：文献后端不匹配}
+在某次编译中，参考文献始终显示为问号，且日志出现 \texttt{Please (re)run Biber}。根因是仅运行了 \texttt{xelatex}，未触发 \texttt{biber}。
+
+后续改为固定使用 \texttt{latexmk} 全流程编译后，文献索引恢复正常。
+
+\subsection{阶段二：DFS/BFS 实现调试}
+
+\paragraph{问题 1：状态对象被原地修改}
+早期 DFS 写法中使用可变列表承载状态并重复复用，造成回溯后历史分支被污染，表现为“同一解重复出现”或“解数量异常”。
+
+后续统一改为不可变元组扩展（\texttt{state + (row,)}），问题消失。
+
+\paragraph{问题 2：节点统计口径不一致}
+最开始 DFS/BFS 的 \texttt{expanded\_states} 计数位置不同，一个在出队时计数，一个在扩展子节点时计数，导致方法间无法直接对比。
+
+最终统一定义为“从容器取出一个状态即计 1 次展开”，并在所有方法中保持一致口径。
+
+\subsection{阶段三：位运算回溯（M6）调试}
+
+\paragraph{问题 1：行列映射方向混淆}
+位运算递归天然按“行”推进，而报告统一状态定义是“列 $\rightarrow$ 行”。若不做转换，结果虽看似合法，但无法与其它方法直接比较。
+
+最终在记录解时加入 \texttt{row\_to\_col -> col\_to\_row} 显式转换。
+
+\subsection{阶段四：基准测试与 JSON 输出}
+
+\paragraph{问题 1：结果不可序列化}
+某版脚本尝试将 \texttt{set[tuple]} 直接写入 JSON，触发：
+\begin{quote}
+    \texttt{TypeError: Object of type set is not JSON serializable}
+\end{quote}
+
+修复为仅输出统计值与必要标量字段，解集用于内部校验不直接写入 JSON。
+
+\paragraph{问题 2：重复测试结果偶发不一致}
+曾出现“同方法重复运行解顺序不同”导致的误报。根因不是解错，而是比较时使用了未排序容器。修复方式是先规范化（排序）再比较。
+
+
+\section{后续改进方向}
+
+结合本轮调试经验，后续可以从以下方向继续优化：
+\begin{enumerate}
+    \item 将环境初始化脚本化（依赖安装、版本检查、编译命令），减少人工配置误差；
+    \item 扩展到可配置 $N$，绘制性能随规模变化曲线，避免只看 $N=8$ 的局部结论；
+    \item 探索“逻辑建模 + 高性能后端”的混合方案，在可解释性与速度之间取得更好平衡。
+\end{enumerate}

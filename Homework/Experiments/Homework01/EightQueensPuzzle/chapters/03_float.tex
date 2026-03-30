@@ -1,0 +1,119 @@
+﻿\chapter{方法实现}\label{chap:float}
+
+\section{统一状态表示与合法性判定}
+
+六种方法共享同一种状态定义：长度为 $k$ 的元组
+\begin{equation}
+  s=(q_0,\ldots,q_{k-1})
+\end{equation}
+表示前 $k$ 列已完成放置。尝试在下一列放入候选行 $r$ 时，判定函数为
+\begin{equation}
+  \text{safe}(s,r)=\bigwedge_{c=0}^{k-1}\left[(q_c\neq r)\land(|q_c-r|\neq |c-k|)\right].
+\end{equation}
+若条件成立，状态扩展为 $s'=s\oplus r$。
+
+\section{M1：命令式穷举 + 逻辑筛选}
+
+M1 先由 \texttt{itertools.permutations} 生成全部 $8!$ 个列-行映射，再交给 Kanren 的 \texttt{membero} 与对角线关系做二次筛选。实现直观，但候选空间固定，无法提前剪枝。
+
+\section{M2：纯逻辑求解（\texttt{permuteq}）}
+
+M2 用关系 \texttt{permuteq(rows, qs)} 描述“\texttt{qs} 是 \texttt{rows} 的一个排列”，随后叠加对角线约束：
+\begin{equation}
+  \text{solution}(\mathbf{q})\Leftarrow \texttt{permuteq}(\mathbf{rows},\mathbf{q})\land\texttt{diag\_clear}(\mathbf{q}).
+\end{equation}
+该写法更符合逻辑编程范式，但统一与回溯开销较大。
+
+\section{M3：纯逻辑求解（自定义不等关系）}
+
+\subsection{关系设计}
+
+考虑到 Kanren 0.2.3 未提供可直接调用的 \texttt{neq}，脚本中补充了两类关系：
+\begin{itemize}
+  \item \texttt{neq\_rel(left, right)}：两项不相等；
+  \item \texttt{diagonal\_neq\_rel(left, right, distance)}：两项差值绝对值不等于列距。
+\end{itemize}
+
+这两类关系在“按列赋值”过程中即时触发，可比“先生成再过滤”更早剪掉无效状态。
+
+\subsection{关键代码}
+
+\begin{lstlisting}[language=Python,caption={自定义不等关系实现},label=lst:custom-neq-rel]
+def neq_rel(left, right):
+    def goal(subst):
+        left_value = reify(left, subst)
+        right_value = reify(right, subst)
+        if isvar(left_value) or isvar(right_value):
+            return (subst,)
+        if left_value == right_value:
+            return ()
+        return (subst,)
+
+    return goal
+
+
+def diagonal_neq_rel(left, right, distance: int):
+    def goal(subst):
+        left_value = reify(left, subst)
+        right_value = reify(right, subst)
+        if isvar(left_value) or isvar(right_value):
+            return (subst,)
+        if abs(left_value - right_value) == distance:
+            return ()
+        return (subst,)
+
+    return goal
+\end{lstlisting}
+
+\section{M4 与 M5：DFS / BFS 图搜索}
+
+二者都把“部分棋局”视为节点，“在下一列放置合法皇后”视为扩展操作。差异只在于前沿容器：
+\begin{itemize}
+  \item DFS 使用栈，优先纵向深入；
+  \item BFS 使用队列，按层逐步展开。
+\end{itemize}
+
+\begin{algorithm}
+  \caption{统一搜索框架（DFS/BFS）}\label{algo:search-framework}
+  \begin{algorithmic}[1]
+    \Require 棋盘规模 $N$，容器类型 $C$（栈或队列）
+    \Ensure 全部合法解集合 $S$
+    \State 将空状态 $()$ 放入 $C$
+    \State $S \gets \varnothing$
+    \While{$C$ 非空}
+    \State 取出状态 $state$
+    \If{$|state| = N$}
+    \State 将 $state$ 加入 $S$
+    \Else
+    \For{每个候选行 $r \in [0, N-1]$}
+    \If{$\text{safe}(state, r)$}
+    \State 将 $state \oplus r$ 放入 $C$
+    \EndIf
+    \EndFor
+    \EndIf
+    \EndWhile
+    \State \Return $S$
+  \end{algorithmic}
+\end{algorithm}
+
+\section{M6：位运算回溯}
+
+M6 使用位掩码维护列冲突与两条对角线冲突。对当前行而言，可放位置集合为
+\begin{equation}
+  \texttt{available}=\texttt{full\_mask}~\&~\sim(\texttt{col\_mask}|\texttt{main\_diag\_mask}|\texttt{anti\_diag\_mask}).
+\end{equation}
+每次提取最低位可行位置并递归更新掩码，即可完成搜索。
+
+完整实现已放在附录的完整脚本清单中（见附录代码列表），正文不再重复展开整段函数。
+
+\section{解集一致性验证}
+
+六种方法都得到 92 个合法解；最小字典序解一致为
+\begin{equation}
+  (0,4,7,5,2,6,1,3),
+\end{equation}
+最大字典序解一致为
+\begin{equation}
+  (7,3,0,2,5,1,6,4).
+\end{equation}
+因此可确认不同实现在语义上等价，满足横向性能比较前提。
